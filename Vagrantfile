@@ -5,21 +5,41 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # All Vagrant configuration is done here. The most common configuration
-  # options are documented and commented below. For a complete reference,
-  # please see the online documentation at vagrantup.com.
 
-  # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.define "wheezy1" do |wheezy1|
-    wheezy1.vm.box = "http://synpro-solutions.com/vagrant/debian64_wheezy.box"
-    wheezy1.vm.network "private_network", ip: "172.28.128.11"
-    wheezy1.vm.provision "shell", path: "provision.d/main.sh", args: "primary"
-  end
+  # list of supported systems
+  @systems = ["wheezy1", "wheezy2"]
+  @systems.each do |name|
+    config.vm.define name do |system|
+      # defaults
+      system.vm.box = "http://synpro-solutions.com/vagrant/debian64_wheezy.box"
 
-  config.vm.define "wheezy2" do |wheezy2|
-    wheezy2.vm.box = "http://synpro-solutions.com/vagrant/debian64_wheezy.box"
-    wheezy2.vm.network "private_network", ip: "172.28.128.12"
-    wheezy2.vm.provision "shell", path: "provision.d/main.sh", args: "secondary"
+      # system specific configuration
+      if name == "wheezy1"
+        system.vm.network "private_network", ip: "172.28.128.11"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "primary"
+      elsif name == "wheezy2"
+        system.vm.network "private_network", ip: "172.28.128.12"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "secondary"
+      end
+
+      # provider specific configuration
+      system.vm.provider "virtualbox" do |vb|
+        # Don't boot with headless mode
+        #vb.gui = true
+
+        # use 1GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+
+        # create 2nd disk with 50GB as optional playground
+        disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
+        file_to_disk = File.join(disk_dir, "2nd_disk_#{name}.vdi")
+
+        unless File.exist?(file_to_disk)
+          vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+    end
   end
 
   # Disable automatic box update checking. If you disable this, then
@@ -52,18 +72,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  config.vm.provider "virtualbox" do |vb|
-  #   # Don't boot with headless mode
-  #   vb.gui = true
-  #
-    # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", "1024"]
-  end
-  #
   # View the documentation for the provider you're using for more
   # information on available options.
 
