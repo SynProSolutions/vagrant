@@ -11,7 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   @systems.each do |name|
     config.vm.define name do |system|
       # defaults
-      system.vm.box = "http://synpro-solutions.com/vagrant/debian64_wheezy.box"
+      system.vm.box = "http://synpro.solutions/vagrant/debian64_wheezy.box"
 
       # system specific configuration
       if name == "wheezy1"
