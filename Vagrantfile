@@ -7,6 +7,78 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # list of supported systems
+  @systems = ["stretch1", "stretch2"]
+  @systems.each do |name|
+    config.vm.define name do |system|
+      # defaults
+      system.vm.box = "http://synpro.solutions/vagrant/debian64_stretch.box"
+
+      # system specific configuration
+      if name == "stretch1"
+        system.vm.network "private_network", ip: "172.28.128.91"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "stretch1"
+      elsif name == "stretch2"
+        system.vm.network "private_network", ip: "172.28.128.92"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "stretch2"
+      end
+
+      # provider specific configuration
+      system.vm.provider "virtualbox" do |vb|
+        # Don't boot with headless mode
+        #vb.gui = true
+
+        # use 1GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+
+        # create 2nd disk with 50GB as optional playground
+        disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
+        file_to_disk = File.join(disk_dir, "2nd_disk_#{name}.vdi")
+
+        unless File.exist?(file_to_disk)
+          vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+    end
+  end
+
+  # list of supported systems
+  @systems = ["jessie1", "jessie2"]
+  @systems.each do |name|
+    config.vm.define name do |system|
+      # defaults
+      system.vm.box = "http://synpro.solutions/vagrant/debian64_jessie.box"
+
+      # system specific configuration
+      if name == "jessie1"
+        system.vm.network "private_network", ip: "172.28.128.81"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "jessie1"
+      elsif name == "jessie2"
+        system.vm.network "private_network", ip: "172.28.128.82"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "jessie2"
+      end
+
+      # provider specific configuration
+      system.vm.provider "virtualbox" do |vb|
+        # Don't boot with headless mode
+        #vb.gui = true
+
+        # use 1GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+
+        # create 2nd disk with 50GB as optional playground
+        disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
+        file_to_disk = File.join(disk_dir, "2nd_disk_#{name}.vdi")
+
+        unless File.exist?(file_to_disk)
+          vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+    end
+  end
+
+  # list of supported systems
   @systems = ["wheezy1", "wheezy2"]
   @systems.each do |name|
     config.vm.define name do |system|
@@ -15,11 +87,86 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # system specific configuration
       if name == "wheezy1"
-        system.vm.network "private_network", ip: "172.28.128.11"
-        system.vm.provision "shell", path: "provision.d/main.sh", args: "primary"
+        system.vm.network "private_network", ip: "172.28.128.71"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "wheezy1"
       elsif name == "wheezy2"
-        system.vm.network "private_network", ip: "172.28.128.12"
-        system.vm.provision "shell", path: "provision.d/main.sh", args: "secondary"
+        system.vm.network "private_network", ip: "172.28.128.72"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "wheezy2"
+      end
+
+      # provider specific configuration
+      system.vm.provider "virtualbox" do |vb|
+        # Don't boot with headless mode
+        #vb.gui = true
+
+        # use 1GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+
+        # create 2nd disk with 50GB as optional playground
+        disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
+        file_to_disk = File.join(disk_dir, "2nd_disk_#{name}.vdi")
+
+        unless File.exist?(file_to_disk)
+          vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+    end
+  end
+
+  # list of supported systems
+  @systems = ["squeeze1", "squeeze2"]
+  @systems.each do |name|
+    config.vm.define name do |system|
+      # defaults
+      system.vm.box = "http://synpro.solutions/vagrant/debian64_squeeze.box"
+
+      # system specific configuration
+      if name == "squeeze1"
+        system.vm.network "private_network", ip: "172.28.128.61"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "squeeze1"
+      elsif name == "squeeze2"
+        system.vm.network "private_network", ip: "172.28.128.62"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "squeeze2"
+      end
+
+      # provider specific configuration
+      system.vm.provider "virtualbox" do |vb|
+        # Don't boot with headless mode
+        #vb.gui = true
+
+        # use 1GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+
+        # create 2nd disk with 50GB as optional playground
+        disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
+        file_to_disk = File.join(disk_dir, "2nd_disk_#{name}.vdi")
+
+        unless File.exist?(file_to_disk)
+          vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+    end
+  end
+
+  # list of supported systems
+  @systems = ["lenny1", "lenny2"]
+  @systems.each do |name|
+    config.vm.define name do |system|
+      # defaults
+      system.vm.box = "http://synpro.solutions/vagrant/debian64_lenny.box"
+
+      # lenny lacks dkms support, Virtualbox Guest Additions aren't available therefore
+      system.vm.synced_folder '.', '/vagrant', disabled: true
+
+      # system specific configuration
+      if name == "lenny1"
+        system.vm.network "private_network", ip: "172.28.128.51"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "lenny1"
+      elsif name == "lenny2"
+        system.vm.network "private_network", ip: "172.28.128.52"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "lenny2"
       end
 
       # provider specific configuration
