@@ -4,10 +4,7 @@ set -e
 
 echo "Running $0 $@"
 
-case "$1" in
-    primary) host=wheezy1 ;;
-  secondary) host=wheezy2 ;;
-esac
+host="$1"
 
 # make sure sudo can resolve localhost
 if ! grep -q "$host" /etc/hosts ; then
@@ -27,8 +24,16 @@ fi
 if ! grep -q 172.28.128.11 /etc/hosts ; then
   echo "Adding entries for wheezy1/wheezy2 to /etc/hosts"
   echo "# Added via $0 on $(date)" >> /etc/hosts
-  echo "172.28.128.11 wheezy1" >> /etc/hosts
-  echo "172.28.128.12 wheezy2" >> /etc/hosts
+  echo "172.28.128.91 stretch1" >> /etc/hosts
+  echo "172.28.128.92 stretch2" >> /etc/hosts
+  echo "172.28.128.81 jessie1"  >> /etc/hosts
+  echo "172.28.128.82 jessie2"  >> /etc/hosts
+  echo "172.28.128.71 wheezy1"  >> /etc/hosts
+  echo "172.28.128.72 wheezy2"  >> /etc/hosts
+  echo "172.28.128.61 squeeze1" >> /etc/hosts
+  echo "172.28.128.62 squeeze2" >> /etc/hosts
+  echo "172.28.128.51 lenny1"   >> /etc/hosts
+  echo "172.28.128.52 lenny2"   >> /etc/hosts
 fi
 
 # config file setup
