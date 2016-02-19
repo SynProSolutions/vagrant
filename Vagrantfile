@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # list of supported systems
-  @systems = ["stretch1", "stretch2"]
+  @systems = ["stretch1", "stretch2", "stretch3"]
   @systems.each do |name|
     config.vm.define name do |system|
       # defaults
@@ -20,6 +20,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       elsif name == "stretch2"
         system.vm.network "private_network", ip: "172.28.128.92"
         system.vm.provision "shell", path: "provision.d/main.sh", args: "stretch2"
+      elsif name == "stretch3"
+        system.vm.network "private_network", ip: "172.28.128.93"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "stretch3"
       end
 
       # provider specific configuration
@@ -43,7 +46,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # list of supported systems
-  @systems = ["jessie1", "jessie2"]
+  @systems = ["jessie1", "jessie2", "jessie3"]
   @systems.each do |name|
     config.vm.define name do |system|
       # defaults
@@ -56,6 +59,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       elsif name == "jessie2"
         system.vm.network "private_network", ip: "172.28.128.82"
         system.vm.provision "shell", path: "provision.d/main.sh", args: "jessie2"
+      elsif name == "jessie3"
+        system.vm.network "private_network", ip: "172.28.128.83"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "jessie3"
       end
 
       # provider specific configuration
@@ -79,7 +85,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # list of supported systems
-  @systems = ["wheezy1", "wheezy2"]
+  @systems = ["wheezy1", "wheezy2", "wheezy3"]
   @systems.each do |name|
     config.vm.define name do |system|
       # defaults
@@ -92,6 +98,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       elsif name == "wheezy2"
         system.vm.network "private_network", ip: "172.28.128.72"
         system.vm.provision "shell", path: "provision.d/main.sh", args: "wheezy2"
+      elsif name == "wheezy3"
+        system.vm.network "private_network", ip: "172.28.128.73"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "wheezy3"
       end
 
       # provider specific configuration
@@ -115,7 +124,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # list of supported systems
-  @systems = ["squeeze1", "squeeze2"]
+  @systems = ["squeeze1", "squeeze2", "squeeze3"]
   @systems.each do |name|
     config.vm.define name do |system|
       # defaults
@@ -128,6 +137,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       elsif name == "squeeze2"
         system.vm.network "private_network", ip: "172.28.128.62"
         system.vm.provision "shell", path: "provision.d/main.sh", args: "squeeze2"
+      elsif name == "squeeze3"
+        system.vm.network "private_network", ip: "172.28.128.63"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "squeeze3"
       end
 
       # provider specific configuration
@@ -151,7 +163,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # list of supported systems
-  @systems = ["lenny1", "lenny2"]
+  @systems = ["lenny1", "lenny2", "lenny3"]
   @systems.each do |name|
     config.vm.define name do |system|
       # defaults
@@ -167,6 +179,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       elsif name == "lenny2"
         system.vm.network "private_network", ip: "172.28.128.52"
         system.vm.provision "shell", path: "provision.d/main.sh", args: "lenny2"
+      elsif name == "lenny3"
+        system.vm.network "private_network", ip: "172.28.128.53"
+        system.vm.provision "shell", path: "provision.d/main.sh", args: "lenny3"
       end
 
       # provider specific configuration
