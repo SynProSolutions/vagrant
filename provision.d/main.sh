@@ -21,8 +21,8 @@ if ! grep -q "$host" /etc/hostname ; then
 fi
 
 # for easy switching between systems
-if ! grep -q 172.28.128.11 /etc/hosts ; then
-  echo "Adding entries for wheezy1/wheezy2 to /etc/hosts"
+if ! grep -q 172.28.128. /etc/hosts ; then
+  echo "Adding entries for VMs to /etc/hosts"
   echo "# Added via $0 on $(date)" >> /etc/hosts
   echo "172.28.128.91 stretch1" >> /etc/hosts
   echo "172.28.128.92 stretch2" >> /etc/hosts
