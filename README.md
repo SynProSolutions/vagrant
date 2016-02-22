@@ -20,15 +20,14 @@ Start one plain Debian jessie system:
 
 NOTE: Just replace `jessie` with the Debian release you want to use (`lenny`, `squeeze`, `wheezy`, `jessie` + `stretch` being available).
 
-If you want two Debian jessie systems (e.g. to test things like H/A or DRBD):
-
-```
-% vagrant up jessie{1,2}
-% vagrant ssh jessie1
-```
-
-You can connect from jessie1 to jessie2 and vice versa by ssh-ing as user root with password `vagrant` (e.g. `ssh root@jessie2` from jessie1 system).
 Three nodes for each Debian release have been pre-defined (e.g. jessie1, jessie2, jessie3).
+If you need three Debian jessie systems (e.g. to test things like H/A or DRBD):
+
+```
+% vagrant up jessie{1,2,3} && vagrant ssh jessie1
+```
+
+You can connect between the systems by ssh-ing as user `vagrant` with password `vagrant` (e.g. `ssh vagrant@jessie2` from jessie1 system).
 
 ## Vagrant's base box file
 
