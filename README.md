@@ -28,6 +28,7 @@ If you want two Debian jessie systems (e.g. to test things like H/A or DRBD):
 ```
 
 You can connect from jessie1 to jessie2 and vice versa by ssh-ing as user root with password `vagrant` (e.g. `ssh root@jessie2` from jessie1 system).
+Three nodes for each Debian release have been pre-defined (e.g. jessie1, jessie2, jessie3).
 
 ## Vagrant's base box file
 
