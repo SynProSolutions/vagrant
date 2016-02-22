@@ -77,3 +77,10 @@ touch /home/vagrant/.zshrc
 
 echo "Updating Debian package information"
 apt-get update
+
+# ensure vagrant user has a password, by default ssh-ing on
+# Debian >=jessie no longer works with passwords
+if grep -q 'vagrant:!:' /etc/shadow ; then
+  echo "Password for user 'vagrant' is unset, setting to 'vagrant' now"
+  echo vagrant:vagrant | chpasswd
+fi

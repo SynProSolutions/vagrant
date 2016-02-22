@@ -35,11 +35,6 @@ if ! grep -q '/mnt/playground/' /etc/fstab ; then
 fi
 sudo mkdir -p /mnt/playground
 
-if sudo grep -q 'vagrant:!:' /etc/shadow ; then
-  echo "Password for user 'vagrant' is unset, setting password to 'vagrant'"
-  echo vagrant:vagrant | sudo chpasswd
-fi
-
 case $(hostname) in
   "${codename}3")
     if mountpoint -q /mnt/playground ; then
