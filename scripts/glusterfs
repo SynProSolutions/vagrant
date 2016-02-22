@@ -1,0 +1,54 @@
+#!/bin/bash
+# Purpose: set up glusterfs in a 3 node environment, using Debian's backport packages
+# Usage instructions:
+# * vagrant up jessie{1,2,3}
+# * execute /vagrant/scripts/glusterfs in every VM, first jessie1 + jessie2, finally jessie3
+
+set -eu
+set -o pipefail
+
+codename="$(lsb_release -c -s)"
+
+if ! [ -e /etc/apt/sources.list.d/backports.list ] ; then
+  echo "deb http://httpredir.debian.org/debian ${codename}-backports main" | sudo tee -a /etc/apt/sources.list.d/backports.list
+fi
+sudo apt-get update
+sudo apt-get install -y -t "${codename}-backports" glusterfs-client glusterfs-server
+
+# initial config creation, execute on *last* node
+case $(hostname) in
+  "${codename}3")
+    sudo gluster peer probe "${codename}1"
+    sudo gluster peer probe "${codename}2"
+    if sudo gluster volume info playground &>/dev/null ; then
+      echo "gluster volume playground exists already, skipping creation."
+    else
+      # note: "force" option only necessary with wheezy-backports and newer
+      sudo gluster volume create playground replica 3 transport tcp "${codename}1:/srv/glusterfs" "${codename}2:/srv/glusterfs" "${codename}3:/srv/glusterfs" force
+      sudo gluster volume start playground
+    fi
+    ;;
+esac
+
+if ! grep -q '/mnt/playground/' /etc/fstab ; then
+  echo "${codename}1:/playground   /mnt/playground/   glusterfs   defaults,_netdev,acl,backupvolfile-server=${codename}2   0   0" | sudo tee -a /etc/fstab
+fi
+sudo mkdir -p /mnt/playground
+
+if sudo grep -q 'vagrant:!:' /etc/shadow ; then
+  echo "Password for user 'vagrant' is unset, setting password to 'vagrant'"
+  echo vagrant:vagrant | sudo chpasswd
+fi
+
+case $(hostname) in
+  "${codename}3")
+    if mountpoint -q /mnt/playground ; then
+      echo "/mnt/playground already mounted, skipping mount"
+    else
+      sudo mount /mnt/playground
+    fi
+    hostname | sudo tee -a /mnt/playground/$(hostname) && ls -la /mnt/playground/
+    ssh vagrant@"${codename}1" "mountpoint -q /mnt/playground || sudo mount /mnt/playground ; hostname | sudo tee -a /mnt/playground/${codename}1"
+    ssh vagrant@"${codename}2" "mountpoint -q /mnt/playground || sudo mount /mnt/playground ; hostname | sudo tee -a /mnt/playground/${codename}2"
+    ;;
+esac
