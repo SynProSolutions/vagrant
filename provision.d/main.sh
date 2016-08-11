@@ -17,7 +17,7 @@ fi
 if ! grep -q "$host" /etc/hostname ; then
   echo "Adjusting hostname to $host"
   echo $host > /etc/hostname
-  /etc/init.d/hostname.sh
+  hostname -F /etc/hostname
 fi
 
 # for easy switching between systems
