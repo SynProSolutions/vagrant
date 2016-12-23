@@ -24,21 +24,26 @@ fi
 if ! grep -q 172.28.128. /etc/hosts ; then
   echo "Adding entries for VMs to /etc/hosts"
   echo "# Added via $0 on $(date)" >> /etc/hosts
-  echo "172.28.128.91 stretch1" >> /etc/hosts
-  echo "172.28.128.92 stretch2" >> /etc/hosts
-  echo "172.28.128.93 stretch3" >> /etc/hosts
-  echo "172.28.128.81 jessie1"  >> /etc/hosts
-  echo "172.28.128.82 jessie2"  >> /etc/hosts
-  echo "172.28.128.83 jessie3"  >> /etc/hosts
-  echo "172.28.128.71 wheezy1"  >> /etc/hosts
-  echo "172.28.128.72 wheezy2"  >> /etc/hosts
-  echo "172.28.128.73 wheezy3"  >> /etc/hosts
-  echo "172.28.128.61 squeeze1" >> /etc/hosts
-  echo "172.28.128.62 squeeze2" >> /etc/hosts
-  echo "172.28.128.63 squeeze3" >> /etc/hosts
-  echo "172.28.128.51 lenny1"   >> /etc/hosts
-  echo "172.28.128.52 lenny2"   >> /etc/hosts
-  echo "172.28.128.53 lenny3"   >> /etc/hosts
+
+  for i in {1..9} ; do
+    echo "172.28.128.9${i} stretch${i}" >> /etc/hosts
+  done
+
+  for i in {1..9} ; do
+    echo "172.28.128.8${i} jessie${i}" >> /etc/hosts
+  done
+
+  for i in {1..9} ; do
+    echo "172.28.128.7${i} wheezy${i}" >> /etc/hosts
+  done
+
+  for i in {1..9} ; do
+    echo "172.28.128.6${i} squeeze${i}" >> /etc/hosts
+  done
+
+  for i in {1..9} ; do
+    echo "172.28.128.5${i} lenny${i}" >> /etc/hosts
+  done
 fi
 
 # config file setup
