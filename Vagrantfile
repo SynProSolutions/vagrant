@@ -1,6 +1,30 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Generate MAC address for bridged interface, so MAC is the same
+# even after restart/recreate, avoids collisions in network though
+# still being different for different VMs
+# Our MAC as 4 parts: vbox_mac + host_mac + vm_mac_part + dhtest_mac =>
+# * vbox_mac     == "0A-00-27" # VirtualBox MAC address prefix
+# * host_mac     == 16 bits    # 4 pseudo-random digits generated from hostname of host machine
+# * vm_mac_part  == 7 bits     # 2 pseudo-random digits generated from name of guest VM
+# * dhtest_mac   == 1 bit      # 1 bit in last digit which allows to have dynamic MACs (real interface MAC=0, dhtest MAC=1)
+require "socket"
+require 'digest/md5'
+
+def gen_mac(vm_mac_part)
+  vbox_mac = "0A0027"
+  host_mac = Digest::MD5.hexdigest(Socket.gethostname)[0..3].upcase
+  dhtest_mac = 0
+
+  vm_mac_last = (vm_mac_part[1].hex & 0xE | dhtest_mac).to_s(16)
+
+  return vbox_mac + host_mac + vm_mac_part[0] + vm_mac_last
+end
+
+# identify public interface automatically
+$host_interface = %x[ip route | awk '/default via/ {print $5}']
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
@@ -22,6 +46,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # provider specific configuration
         system.vm.provider "virtualbox" do |vb|
+          vb.name = "#{name}"
           # Boot with headless mode by default, to enable GUI mode set:
           #vb.gui = true
 
@@ -37,6 +62,38 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           end
           vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
         end
+      end
+    end
+  end
+
+  (1..9).each do |id|
+    config.vm.define :"jessie-proxmox#{id}" do |proxmox|
+      proxmox.vm.box = "http://synpro.solutions/vagrant/debian64_jessie.box"
+      proxmox.vm.network :forwarded_port, adapter: 1, id: "proxmox",    guest: 8006, host: 8006, auto_correct: true, protocol: "tcp"
+      proxmox.vm.network :forwarded_port, adapter: 1, id: "spiceproxy", guest: 3128, host: 3128, auto_correct: true, protocol: "tcp"
+
+      # generate last part of VM MAC based on VM name and add eth2 interface as bridged interface
+      vm_mac_part  = Digest::MD5.hexdigest("jessie-proxmox#{id}")[0..1].upcase
+      proxmox.vm.network :public_network, adapter: 3, bridge: $host_interface, use_dhcp_assigned_default_route: true, mac: gen_mac(vm_mac_part)
+
+      proxmox.vm.provider :virtualbox do |vb|
+        vb.name = "jessie-proxmox#{id}"
+        # configured as 172.16.0.X
+        vb.customize ["modifyvm", :id, "--nic2", "intnet"]
+        # use 1GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+        # create 2nd disk with 50GB as optional playground
+        disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
+        file_to_disk = File.join(disk_dir, "2nd_disk_#{vb.name}.vdi")
+        unless File.exist?(file_to_disk)
+          vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+
+      proxmox.vm.provision :shell do |shell|
+        shell.path = "proxmox.d/install.sh"
+        shell.args = "proxmox#{id}"
       end
     end
   end
