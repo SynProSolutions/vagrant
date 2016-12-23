@@ -20,8 +20,8 @@ Start one plain Debian jessie system:
 
 NOTE: Just replace `jessie` with the Debian release you want to use (`lenny`, `squeeze`, `wheezy`, `jessie` + `stretch` being available).
 
-Three nodes for each Debian release have been pre-defined (e.g. jessie1, jessie2, jessie3).
-If you need three Debian jessie systems (e.g. to test things like H/A or DRBD):
+Nine nodes for each Debian release have been pre-defined (e.g. jessie1, jessie2, jessie3,..., jessie9).
+If you need three Debian jessie systems (e.g. to test things like H/A or CEPH):
 
 ```
 % vagrant up jessie{1,2,3} && vagrant ssh jessie1
