@@ -8,10 +8,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # list of supported systems
   # warning: provision.d/main.sh has a hardcoded IP<->hostname list for /etc/hosts
   releases = { lenny: 5, squeeze: 6, wheezy: 7, jessie: 8, stretch: 9 }
-  num_machines = [1,2,3,4,5,6,7,8,9]
 
   releases.each do |release, version|
-    num_machines.each do |id|
+    (1..9).each do |id|
       name = "#{release}#{id}"
       config.vm.define "#{name}" do |system|
         # defaults
