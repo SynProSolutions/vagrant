@@ -98,6 +98,36 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  (1..9).each do |id|
+    config.vm.define :"jessie-mysql#{id}" do |mysql|
+      mysql.vm.box = "http://synpro.solutions/vagrant/debian64_jessie.box"
+
+      # generate last part of VM MAC based on VM name and add eth2 interface as bridged interface
+      vm_mac_part  = Digest::MD5.hexdigest("jessie-mysql#{id}")[0..1].upcase
+      mysql.vm.network :public_network, adapter: 3, bridge: $host_interface, use_dhcp_assigned_default_route: true, mac: gen_mac(vm_mac_part)
+
+      mysql.vm.provider :virtualbox do |vb|
+        vb.name = "jessie-mysql#{id}"
+        # configured as 172.16.0.X
+        vb.customize ["modifyvm", :id, "--nic2", "intnet"]
+        # use 1GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+        # create 2nd disk with 50GB as optional playground
+        disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
+        file_to_disk = File.join(disk_dir, "2nd_disk_#{vb.name}.vdi")
+        unless File.exist?(file_to_disk)
+          vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
+        end
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+
+      mysql.vm.provision :shell do |shell|
+        shell.path = "mysql.d/install.sh"
+        shell.args = "mysql#{id}"
+      end
+    end
+  end
+
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
