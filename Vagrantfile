@@ -23,7 +23,7 @@ def gen_mac(vm_mac_part)
 end
 
 # identify public interface automatically
-$host_interface = %x[ip route | awk '/default via/ {print $5}']
+$host_interface = %x[ip route | awk '/^0\.0\.0\.0|default/{printf $NF;exit;}']
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
