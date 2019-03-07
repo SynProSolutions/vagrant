@@ -67,21 +67,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   (1..9).each do |id|
-    config.vm.define :"jessie-proxmox#{id}" do |proxmox|
-      proxmox.vm.box = "http://synpro.solutions/vagrant/debian64_jessie.box"
+    config.vm.define :"stretch-proxmox#{id}" do |proxmox|
+      proxmox.vm.box = "http://synpro.solutions/vagrant/debian64_stretch.box"
       proxmox.vm.network :forwarded_port, adapter: 1, id: "proxmox",    guest: 8006, host: 8006, auto_correct: true, protocol: "tcp"
       proxmox.vm.network :forwarded_port, adapter: 1, id: "spiceproxy", guest: 3128, host: 3128, auto_correct: true, protocol: "tcp"
 
       # generate last part of VM MAC based on VM name and add eth2 interface as bridged interface
-      vm_mac_part  = Digest::MD5.hexdigest("jessie-proxmox#{id}")[0..1].upcase
+      vm_mac_part  = Digest::MD5.hexdigest("stretch-proxmox#{id}")[0..1].upcase
       proxmox.vm.network :public_network, adapter: 3, bridge: $host_interface, use_dhcp_assigned_default_route: true, mac: gen_mac(vm_mac_part)
 
       proxmox.vm.provider :virtualbox do |vb|
-        vb.name = "jessie-proxmox#{id}"
+        vb.name = "stretch-proxmox#{id}"
         # configured as 172.16.0.X
         vb.customize ["modifyvm", :id, "--nic2", "intnet"]
-        # use 1GB RAM
-        vb.customize ["modifyvm", :id, "--memory", "1024"]
+        # use 2GB RAM
+        vb.customize ["modifyvm", :id, "--memory", "2048"]
+        # disable IO-APIC to avoid clock skew, important esp. with ceph
+        vb.customize ['modifyvm', :id, '--ioapic', 'off']
         # create 2nd disk with 50GB as optional playground
         disk_dir = File.join(File.dirname(File.expand_path(__FILE__)), "disks/")
         file_to_disk = File.join(disk_dir, "2nd_disk_#{vb.name}.vdi")

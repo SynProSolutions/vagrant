@@ -1,5 +1,5 @@
 #!/bin/bash
-# purpose: install Proxmox on a plain Debian jessie system
+# purpose: install Proxmox on a plain Debian stretch system
 
 set -e
 set -u
@@ -46,6 +46,7 @@ if ! grep -q 'iface eth1 inet static' /etc/network/interfaces ; then
 
   cat >> /etc/network/interfaces << EOF
 # note: added via proxmox.d/install.sh - required for pveceph support
+auto eth1
 iface eth1 inet static
   address 172.16.0.${HOSTNAME//[^0-9]}
   netmask 255.255.255.0
@@ -71,10 +72,12 @@ fi
 # install proxmox in interactive mode
 export "DEBIAN_FRONTEND=noninteractive"
 
-if ! [ -r /etc/apt/sources.list.d/pve-enterprise.list ] ; then
-  echo "deb http://download.proxmox.com/debian jessie pvetest" > /etc/apt/sources.list.d/pve-install-repo.list
-  wget -O /etc/apt/proxmox_key.asc 'http://download.proxmox.com/debian/key.asc'
-  apt-key add /etc/apt/proxmox_key.asc
+if ! [ -r /etc/apt/sources.list.d/pve-install-repo.list ] ; then
+  echo "deb http://download.proxmox.com/debian stretch pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
+fi
+
+if ! [ -r /etc/apt/trusted.gpg.d/proxmox.gpg ] ; then
+  wget -O /etc/apt/trusted.gpg.d/proxmox.gpg http://download.proxmox.com/debian/proxmox-ve-release-5.x.gpg
 fi
 
 # ensure that the file doesn't exist if provisioning was interrupted
@@ -97,15 +100,26 @@ EOF
 sysctl -p /etc/sysctl.d/proxmox.conf
 
 # useful packages
-apt-get -y install lsof ntp strace telnet
+apt-get -y install man-db lsof ntp strace telnet
 
-# ensure it's running
-service pve-manager restart
+# drop unnecessary packages, smartd failing to run inside VM
+if [ "$(dpkg-query -f "\${db:Status-Status} \${db:Status-Eflag}" -W smartd 2>/dev/null)" = "installed ok" ] ; then
+  systemctl disable smartd.service || true
+  systemctl reset-failed
+  apt-get -y --purge remove smartd
+fi
+
+# ensure we use the pve-no-subscription repository
+if ! [ -r /etc/apt/sources.list.d/pve-install-repo.list ] ; then
+  echo "deb http://download.proxmox.com/debian stretch pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
+fi
+rm -f /etc/apt/sources.list.d/pve-enterprise.list
+apt-get update
 
 case "${HOSTNAME}" in
   *1) if ! [ -r /etc/pve/corosync.conf ] ; then
         # create cluster
-        pvecm create proxmox-jessie
+        pvecm create proxmox-stretch
       fi
 
       # share ssh keys with further nodes, to automate setup
@@ -121,7 +135,8 @@ case "${HOSTNAME}" in
       cp /vagrant/proxmox.d/ssh/* /root/.ssh/
       ssh-keyscan 172.16.0.1 >> ~/.ssh/known_hosts
       # finally add node to cluster
-      pvecm add 172.16.0.1 ;;
+      yes | pvecm add 172.16.0.1 --use_ssh
+      ;;
 esac
 
 touch "${proxmox_setup}"
@@ -130,7 +145,7 @@ case "${HOSTNAME}" in
   *1)
     ;;
   *)
-    cat > /usr/local/bin/ceph-proxmox-setup << EOF
+    cat > /usr/local/sbin/ceph-proxmox-setup << EOF
 #!/bin/bash
 
 set -e
@@ -173,17 +188,19 @@ rbd: synpro-ceph-storage
         username admin
         content images
 __EOF__
+
+echo Now you should be ready for adding a ceph pool.
 EOF
 
-    chmod 775 /usr/local/bin/ceph-proxmox-setup
+    chmod 775 /usr/local/sbin/ceph-proxmox-setup
 
     echo "NOTE: please get rid of /vagrant/proxmox.d/ssh/ proxmox.d/ssh once you set up your last proxmox cluster node,"
     echo "      just execute 'rm -rf proxmox.d/ssh' on your host system."
 
     echo "To set up ceph on the proxmox cluster execute:
 
-  vagrant ssh jessie-$HOSTNAME
-  sudo /usr/local/bin/ceph-proxmox-setup
+  vagrant ssh stretch-$HOSTNAME
+  sudo /usr/local/sbin/ceph-proxmox-setup
 
 "
     ;;
