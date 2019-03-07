@@ -26,6 +26,10 @@ if ! grep -q 172.28.128. /etc/hosts ; then
   echo "# Added via $0 on $(date)" >> /etc/hosts
 
   for i in {1..9} ; do
+    echo "172.28.128.1${i} buster${i}" >> /etc/hosts
+  done
+
+  for i in {1..9} ; do
     echo "172.28.128.9${i} stretch${i}" >> /etc/hosts
   done
 
@@ -44,6 +48,12 @@ if ! grep -q 172.28.128. /etc/hosts ; then
   for i in {1..9} ; do
     echo "172.28.128.5${i} lenny${i}" >> /etc/hosts
   done
+fi
+
+# ensure wget is available
+if [ "$(dpkg-query -f "\${db:Status-Status}" -W wget 2>/dev/null)" = "not-installed" ] ; then
+  apt-get update
+  apt-get -y install wget
 fi
 
 # config file setup

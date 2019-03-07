@@ -31,7 +31,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # list of supported systems
   # warning: provision.d/main.sh has a hardcoded IP<->hostname list for /etc/hosts
-  releases = { lenny: 5, squeeze: 6, wheezy: 7, jessie: 8, stretch: 9 }
+  releases = { lenny: 5, squeeze: 6, wheezy: 7, jessie: 8, stretch: 9, buster: 10}
 
   releases.each do |release, version|
     (1..9).each do |id|
