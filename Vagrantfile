@@ -30,7 +30,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # list of supported systems
-  # warning: provision.d/main.sh has a hardcoded IP<->hostname list for /etc/hosts
+  # warning: provision.d/hosts.sh has a hardcoded IP<->hostname list for /etc/hosts
   releases = { lenny: 5, squeeze: 6, wheezy: 7, jessie: 8, stretch: 9, buster: 10}
 
   releases.each do |release, version|
@@ -42,7 +42,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # system specific configuration
         system.vm.network "private_network", ip: "172.28.128.#{version}#{id}"
-        system.vm.provision "shell", path: "provision.d/main.sh", args: "#{name}"
+
+        system.vm.provision :shell do |shell|
+          shell.path = "provision.d/users.sh"
+        end
+
+        system.vm.provision :shell do |shell|
+          shell.path = "provision.d/hosts.sh"
+          shell.args = "#{name}"
+        end
 
         # provider specific configuration
         system.vm.provider "virtualbox" do |vb|
@@ -91,6 +99,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           vb.customize ['createhd', '--filename', file_to_disk, '--size', 50 * 1024]
         end
         vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+
+      proxmox.vm.provision :shell do |shell|
+        shell.path = "provision.d/users.sh"
       end
 
       proxmox.vm.provision :shell do |shell|
