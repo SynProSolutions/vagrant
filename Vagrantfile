@@ -31,14 +31,14 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # list of supported systems
   # warning: provision.d/hosts.sh has a hardcoded IP<->hostname list for /etc/hosts
-  releases = { lenny: 5, squeeze: 6, wheezy: 7, jessie: 8, stretch: 9, buster: 10}
+  releases = { lenny: 5, squeeze: 6, wheezy: 7, jessie: 8, stretch: 9, buster: 10, bullseye: 11}
 
   releases.each do |release, version|
     (1..9).each do |id|
       name = "#{release}#{id}"
       config.vm.define "#{name}" do |system|
         # defaults
-        system.vm.box = "http://synpro.solutions/vagrant/debian64_#{release}.box"
+        system.vm.box = "https://synpro.solutions/vagrant/debian64_#{release}.box"
 
         # system specific configuration
         system.vm.network "private_network", ip: "172.28.128.#{version}#{id}"
@@ -76,7 +76,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   (1..9).each do |id|
     config.vm.define :"stretch-proxmox#{id}" do |proxmox|
-      proxmox.vm.box = "http://synpro.solutions/vagrant/debian64_stretch.box"
+      proxmox.vm.box = "https://synpro.solutions/vagrant/debian64_stretch.box"
       proxmox.vm.network :forwarded_port, adapter: 1, id: "proxmox",    guest: 8006, host: 8006, auto_correct: true, protocol: "tcp"
       proxmox.vm.network :forwarded_port, adapter: 1, id: "spiceproxy", guest: 3128, host: 3128, auto_correct: true, protocol: "tcp"
 

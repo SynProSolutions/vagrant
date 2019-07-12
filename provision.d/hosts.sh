@@ -26,7 +26,11 @@ if ! grep -q 172.28.128. /etc/hosts ; then
   echo "# Added via $0 on $(date)" >> /etc/hosts
 
   for i in {1..9} ; do
-    echo "172.28.128.1${i} buster${i}" >> /etc/hosts
+    echo "172.28.128.11${i} bullseye${i}" >> /etc/hosts
+  done
+
+  for i in {1..9} ; do
+    echo "172.28.128.10${i} buster${i}" >> /etc/hosts
   done
 
   for i in {1..9} ; do
