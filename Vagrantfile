@@ -43,6 +43,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # system specific configuration
         system.vm.network "private_network", ip: "172.28.128.#{version}#{id}"
 
+        # http + https forwards
+        system.vm.network :forwarded_port, adapter: 1, id: "http",    guest: 80,  host: 8080, auto_correct: true, protocol: "tcp"
+        system.vm.network :forwarded_port, adapter: 1, id: "https",   guest: 443, host: 8443, auto_correct: true, protocol: "tcp"
+
         system.vm.provision :shell do |shell|
           shell.path = "provision.d/users.sh"
         end
