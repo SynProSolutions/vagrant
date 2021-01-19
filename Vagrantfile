@@ -75,17 +75,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   (1..9).each do |id|
-    config.vm.define :"stretch-proxmox#{id}" do |proxmox|
-      proxmox.vm.box = "https://synpro.solutions/vagrant/debian64_stretch.box"
+    config.vm.define :"buster-proxmox#{id}" do |proxmox|
+      proxmox.vm.box = "https://synpro.solutions/vagrant/debian64_buster.box"
       proxmox.vm.network :forwarded_port, adapter: 1, id: "proxmox",    guest: 8006, host: 8006, auto_correct: true, protocol: "tcp"
       proxmox.vm.network :forwarded_port, adapter: 1, id: "spiceproxy", guest: 3128, host: 3128, auto_correct: true, protocol: "tcp"
 
       # generate last part of VM MAC based on VM name and add eth2 interface as bridged interface
-      vm_mac_part  = Digest::MD5.hexdigest("stretch-proxmox#{id}")[0..1].upcase
+      vm_mac_part  = Digest::MD5.hexdigest("buster-proxmox#{id}")[0..1].upcase
       proxmox.vm.network :public_network, adapter: 3, bridge: $host_interface, use_dhcp_assigned_default_route: true, mac: gen_mac(vm_mac_part)
 
       proxmox.vm.provider :virtualbox do |vb|
-        vb.name = "stretch-proxmox#{id}"
+        vb.name = "buster-proxmox#{id}"
         # configured as 172.16.0.X
         vb.customize ["modifyvm", :id, "--nic2", "intnet"]
         # use 2GB RAM

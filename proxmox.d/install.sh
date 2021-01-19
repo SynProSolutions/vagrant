@@ -1,5 +1,5 @@
 #!/bin/bash
-# purpose: install Proxmox on a plain Debian stretch system
+# purpose: install Proxmox on a plain Debian buster system
 
 set -e
 set -u
@@ -73,11 +73,11 @@ fi
 export "DEBIAN_FRONTEND=noninteractive"
 
 if ! [ -r /etc/apt/sources.list.d/pve-install-repo.list ] ; then
-  echo "deb http://download.proxmox.com/debian stretch pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
+  echo "deb http://download.proxmox.com/debian buster pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
 fi
 
 if ! [ -r /etc/apt/trusted.gpg.d/proxmox.gpg ] ; then
-  wget -O /etc/apt/trusted.gpg.d/proxmox.gpg http://download.proxmox.com/debian/proxmox-ve-release-5.x.gpg
+  wget -O /etc/apt/trusted.gpg.d/proxmox.gpg http://download.proxmox.com/debian/proxmox-ve-release-6.x.gpg
 fi
 
 # ensure that the file doesn't exist if provisioning was interrupted
@@ -111,7 +111,7 @@ fi
 
 # ensure we use the pve-no-subscription repository
 if ! [ -r /etc/apt/sources.list.d/pve-install-repo.list ] ; then
-  echo "deb http://download.proxmox.com/debian stretch pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
+  echo "deb http://download.proxmox.com/debian buster pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
 fi
 rm -f /etc/apt/sources.list.d/pve-enterprise.list
 apt-get update
@@ -119,7 +119,7 @@ apt-get update
 case "${HOSTNAME}" in
   *1) if ! [ -r /etc/pve/corosync.conf ] ; then
         # create cluster
-        pvecm create proxmox-stretch
+        pvecm create proxmox-buster
       fi
 
       # share ssh keys with further nodes, to automate setup
@@ -199,7 +199,7 @@ EOF
 
     echo "To set up ceph on the proxmox cluster execute:
 
-  vagrant ssh stretch-$HOSTNAME
+  vagrant ssh buster-$HOSTNAME
   sudo /usr/local/sbin/ceph-proxmox-setup
 
 "
